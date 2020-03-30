@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KoronaWirusMonitor3.Models;
 using KoronaWirusMonitor3.Repository;
+using KWMonitor.Services;
 
 namespace KWMonitor.Controllers
 {
@@ -15,10 +16,12 @@ namespace KWMonitor.Controllers
     public class CountriesController : ControllerBase
     {
         private readonly KWMContext _context;
+        private readonly CountriesService _countriesService;
 
-        public CountriesController(KWMContext context)
+        public CountriesController(KWMContext context, CountriesService countriesService)
         {
             _context = context;
+            _countriesService = countriesService;
         }
 
         // GET: api/Countries
@@ -52,25 +55,13 @@ namespace KWMonitor.Controllers
             {
                 return BadRequest();
             }
-
-            _context.Entry(country).State = EntityState.Modified;
-
-            try
+            
+            var result = await _countriesService.PutCountry(id, country);
+            if (result)
             {
-                await _context.SaveChangesAsync();
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CountryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            
             return NoContent();
         }
 

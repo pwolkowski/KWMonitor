@@ -1,4 +1,5 @@
 using KoronaWirusMonitor3.Repository;
+using KWMonitor.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ namespace KWMonitor
             (options =>
                 options.UseSqlite("Data Source=c:\\temp\\KWMonitor.db"));
             services.AddTransient<KWMContext, KWMContext>();
+            services.AddTransient<CountriesService, CountriesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
