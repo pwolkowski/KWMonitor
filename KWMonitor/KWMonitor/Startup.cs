@@ -29,7 +29,7 @@ namespace KWMonitor
             });
             services.AddDbContext<KWMContext>
             (options =>
-                options.UseSqlite("Data Source=c:\\temp\\KWMonitor.db"));
+                options.UseSqlServer(@"Data Source=.\SQLExpress;Database=test;Trusted_Connection=Yes"));
             services.AddTransient<KWMContext, KWMContext>();
             services.AddTransient<CountriesService, CountriesService>();
         }

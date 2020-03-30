@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using KoronaWirusMonitor3.Models;
 using KoronaWirusMonitor3.Repository;
 using KWMonitor.Services;
+using KWMonitor.Validators;
 
 namespace KWMonitor.Controllers
 {
@@ -55,7 +56,14 @@ namespace KWMonitor.Controllers
             {
                 return BadRequest();
             }
-            
+
+            var validator = new CountryValidator();
+            var resultValidator = validator.Validate(country);
+            if (!resultValidator.IsValid)
+            {
+                return BadRequest(resultValidator.Errors);
+            }
+
             var result = await _countriesService.PutCountry(id, country);
             if (result)
             {
