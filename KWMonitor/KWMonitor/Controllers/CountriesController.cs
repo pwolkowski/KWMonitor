@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using KoronaWirusMonitor3.Models;
-using KoronaWirusMonitor3.Repository;
 using KWMonitor.Services;
 using KWMonitor.Validators;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KWMonitor.Controllers
 {
@@ -16,12 +11,10 @@ namespace KWMonitor.Controllers
     [ApiController]
     public class CountriesController : ControllerBase
     {
-        private readonly KWMContext _context;
-        private readonly CountriesService _countriesService;
+        private readonly ICountriesService _countriesService;
 
-        public CountriesController(KWMContext context, CountriesService countriesService)
+        public CountriesController(ICountriesService countriesService)
         {
-            _context = context;
             _countriesService = countriesService;
         }
 
@@ -29,20 +22,18 @@ namespace KWMonitor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
         {
-            return await _context.Countries.ToListAsync();
+            return await _countriesService.GetAll();
         }
 
         // GET: api/Countries/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Country>> GetCountry(int id)
         {
-            var country = await _context.Countries.FindAsync(id);
-
-            if (country == null)
-            {
-                return NotFound();
-            }
-
+            var validator = new IdValidator();
+            var result = validator.Validate(id);
+            if (!result.IsValid) return BadRequest(result.Errors);
+            var country = await _countriesService.GetById(id);
+            if (country == null) return NotFound();
             return country;
         }
 
@@ -52,24 +43,12 @@ namespace KWMonitor.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCountry(int id, Country country)
         {
-            if (id != country.Id)
-            {
-                return BadRequest();
-            }
-
+            if (id != country.Id) return BadRequest();
             var validator = new CountryValidator();
             var resultValidator = validator.Validate(country);
-            if (!resultValidator.IsValid)
-            {
-                return BadRequest(resultValidator.Errors);
-            }
-
-            var result = await _countriesService.PutCountry(id, country);
-            if (result)
-            {
-                return Ok();
-            }
-            
+            if (!resultValidator.IsValid) return BadRequest(resultValidator.Errors);
+            var result = await _countriesService.Update(id, country);
+            if (result) return Ok();
             return NoContent();
         }
 
@@ -79,31 +58,21 @@ namespace KWMonitor.Controllers
         [HttpPost]
         public async Task<ActionResult<Country>> PostCountry(Country country)
         {
-            _context.Countries.Add(country);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCountry", new { id = country.Id }, country);
+            var validator = new CountryValidator();
+            var resultValid = validator.Validate(country);
+            if (!resultValid.IsValid) return BadRequest(resultValid.Errors);
+            var result = _countriesService.Add(country);
+            return CreatedAtAction("GetCountry", new {id = result.Id}, result);
         }
 
         // DELETE: api/Countries/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Country>> DeleteCountry(int id)
+        public async Task<IActionResult> DeleteCountry(int id)
         {
-            var country = await _context.Countries.FindAsync(id);
-            if (country == null)
-            {
-                return NotFound();
-            }
-
-            _context.Countries.Remove(country);
-            await _context.SaveChangesAsync();
-
-            return country;
-        }
-
-        private bool CountryExists(int id)
-        {
-            return _context.Countries.Any(e => e.Id == id);
+            var country = await _countriesService.GetById(id);
+            if (country == null) return NotFound();
+            await _countriesService.Delete(country);
+            return Ok();
         }
     }
 }

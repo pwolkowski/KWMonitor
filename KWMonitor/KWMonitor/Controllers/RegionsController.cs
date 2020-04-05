@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using KoronaWirusMonitor3.Models;
 using KoronaWirusMonitor3.Repository;
 using KWMonitor.DTO;
+using KWMonitor.Services;
+using KWMonitor.Validators;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace KWMonitor.Controllers
 {
@@ -16,30 +16,33 @@ namespace KWMonitor.Controllers
     public class RegionsController : ControllerBase
     {
         private readonly KWMContext _context;
+        private readonly IRegionServices _regionServices;
 
-        public RegionsController(KWMContext context)
+        public RegionsController(KWMContext context, IRegionServices regionServices)
         {
             _context = context;
+            _regionServices = regionServices;
         }
 
         // GET: api/Regions
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Region>>> GetRegions()
         {
-            return await _context.Regions.ToListAsync();
+            return await _regionServices.GetAll();
         }
 
         // GET: api/Regions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Region>> GetRegion(int id)
+        public ActionResult<Region> GetRegion(int id)
         {
-            var region = await _context.Regions.FindAsync(id);
-
-            if (region == null)
+            var validator = new IdValidator();
+            var result = validator.Validate(id);
+            if (!result.IsValid)
             {
-                return NotFound();
+                return BadRequest(result.Errors);
             }
-
+            var region = _regionServices.GetById(id);
+            if (region == null) return NotFound();
             return region;
         }
 
@@ -49,29 +52,18 @@ namespace KWMonitor.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRegion(int id, Region region)
         {
-            if (id != region.Id)
+            if (id != region.Id) return BadRequest();
+            var validator = new RegionValidator();
+            var resultValid = validator.Validate(region);
+            if (!resultValid.IsValid)
             {
-                return BadRequest();
+                return BadRequest(resultValid.Errors);
             }
-
-            _context.Entry(region).State = EntityState.Modified;
-
-            try
+            var result = await _regionServices.Update(region);
+            if(result)
             {
-                await _context.SaveChangesAsync();
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RegionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
@@ -81,14 +73,15 @@ namespace KWMonitor.Controllers
         [HttpPost]
         public async Task<ActionResult<Region>> PostRegion(RegionDto region)
         {
-            var newRegion = _context.Regions.Add(new Region()
-            {
-                Name = region.Name,
-                CountryId = region.CountryId
-            });
+            var newRegion = _context.Regions.Add(
+                new Region
+                {
+                    Name = region.Name,
+                    CountryId = region.CountryId
+                });
             await _context.SaveChangesAsync();
-            var response = await _context.Regions.FindAsync(newRegion.Entity.Id);
-            return CreatedAtAction("GetRegion", new { id = response.Id}, response);
+            var response = _context.Regions.Include(r => r.Country).FirstOrDefault(r => r.Id == newRegion.Entity.Id);
+            return CreatedAtAction("GetRegion", new {id = response.Id}, response);
         }
 
         // DELETE: api/Regions/5
@@ -96,20 +89,12 @@ namespace KWMonitor.Controllers
         public async Task<ActionResult<Region>> DeleteRegion(int id)
         {
             var region = await _context.Regions.FindAsync(id);
-            if (region == null)
-            {
-                return NotFound();
-            }
-
+            if (region == null) return NotFound();
             _context.Regions.Remove(region);
             await _context.SaveChangesAsync();
-
             return region;
         }
 
-        private bool RegionExists(int id)
-        {
-            return _context.Regions.Any(e => e.Id == id);
-        }
+        
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace KoronaWirusMonitor3.Models
+﻿namespace KoronaWirusMonitor3.Models
 {
     public class City
     {
