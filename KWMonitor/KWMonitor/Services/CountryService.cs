@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KWMonitor.Services
 {
-    public class CountriesService : ICountriesService
+    public class CountryService : ICountriesService
     {
         private readonly KWMContext _context;
 
-        public CountriesService(KWMContext context)
+        public CountryService(KWMContext context)
         {
             _context = context;
         }

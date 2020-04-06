@@ -6,7 +6,7 @@ namespace KWMonitor.Validators
     {
         public IdValidator()
         {
-            RuleFor(i => i).NotEqual(0).NotNull().NotEmpty();
+            RuleFor(i => i).GreaterThan(0).NotNull().NotEmpty();
         }
     }
 }

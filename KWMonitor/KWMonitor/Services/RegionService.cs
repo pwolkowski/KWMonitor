@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KWMonitor.Services
 {
-    public class RegionServices : IRegionServices
+    public class RegionService : IRegionService
     {
         private readonly KWMContext _context;
 
-        public RegionServices(KWMContext context)
+        public RegionService(KWMContext context)
         {
             _context = context;
         }

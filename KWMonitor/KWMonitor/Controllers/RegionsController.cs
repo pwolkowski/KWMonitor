@@ -16,9 +16,9 @@ namespace KWMonitor.Controllers
     public class RegionsController : ControllerBase
     {
         private readonly KWMContext _context;
-        private readonly IRegionServices _regionServices;
+        private readonly IRegionService _regionServices;
 
-        public RegionsController(KWMContext context, IRegionServices regionServices)
+        public RegionsController(KWMContext context, IRegionService regionServices)
         {
             _context = context;
             _regionServices = regionServices;

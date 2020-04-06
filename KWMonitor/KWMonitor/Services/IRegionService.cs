@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace KWMonitor.Services
 {
-    public interface IRegionServices
+    public interface IRegionService
     {
         Task<List<Region>> GetAll();
         Region GetById(int id);

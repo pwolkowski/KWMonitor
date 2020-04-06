@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using KoronaWirusMonitor3.Models;
+using KoronaWirusMonitor3.Repository;
 using KWMonitor.Services;
 using KWMonitor.Validators;
 using Microsoft.AspNetCore.Mvc;

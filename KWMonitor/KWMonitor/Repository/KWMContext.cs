@@ -13,5 +13,10 @@ namespace KoronaWirusMonitor3.Repository
         public KWMContext(DbContextOptions<KWMContext> options) : base(options)
         {
         }
+
+        public KWMContext()
+        {
+            
+        }
     }
 }

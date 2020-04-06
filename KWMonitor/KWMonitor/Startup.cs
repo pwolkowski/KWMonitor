@@ -28,8 +28,8 @@ namespace KWMonitor
                 options =>
                     options.UseSqlServer(@"Data Source=.\SQLExpress;Database=test;Trusted_Connection=Yes"));
             services.AddTransient<KWMContext, KWMContext>();
-            services.AddTransient<ICountriesService, CountriesService>();
-            services.AddTransient<IRegionServices, RegionServices>();
+            services.AddTransient<ICountriesService, CountryService>();
+            services.AddTransient<IRegionService, RegionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
